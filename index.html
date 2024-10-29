@@ -4,6 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>My Portfolio</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.9.359/pdf.min.js"></script>
     <style>
         body, html {
             margin: 0;
@@ -16,26 +17,61 @@
             height: 100%;
             border: none;
         }
-        @media (max-width: 768px) {
-            #pdf-viewer {
-                width: 100vw;
-                height: 100vh;
-            }
-        }
     </style>
 </head>
 <body>
-    <iframe id="pdf-viewer" src="https://mozilla.github.io/pdf.js/web/viewer.html?file=portfolio.pdf#zoom=page-fit" title="Portfolio PDF"></iframe>
+    <div id="pdf-viewer"></div>
     <script>
-        document.addEventListener('DOMContentLoaded', function() {
-            const iframe = document.getElementById('pdf-viewer');
-            iframe.onload = function() {
-                iframe.contentWindow.postMessage({
-                    action: 'setZoom',
-                    zoom: 'page-fit'
-                }, '*');
-            };
+        pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.9.359/pdf.worker.min.js';
+
+        const url = 'portfolio.pdf';
+        let pdfDoc = null,
+            pageNum = 1,
+            pageRendering = false,
+            pageNumPending = null,
+            scale = 1.5,
+            canvas = document.createElement('canvas'),
+            ctx = canvas.getContext('2d');
+
+        document.getElementById('pdf-viewer').appendChild(canvas);
+
+        function renderPage(num) {
+            pageRendering = true;
+            pdfDoc.getPage(num).then(function(page) {
+                let viewport = page.getViewport({scale: scale});
+                canvas.height = viewport.height;
+                canvas.width = viewport.width;
+
+                let renderContext = {
+                    canvasContext: ctx,
+                    viewport: viewport
+                };
+                let renderTask = page.render(renderContext);
+
+                renderTask.promise.then(function() {
+                    pageRendering = false;
+                    if (pageNumPending !== null) {
+                        renderPage(pageNumPending);
+                        pageNumPending = null;
+                    }
+                });
+            });
+        }
+
+        pdfjsLib.getDocument(url).promise.then(function(pdfDoc_) {
+            pdfDoc = pdfDoc_;
+            renderPage(pageNum);
         });
+
+        function onResize() {
+            scale = Math.min(window.innerWidth / 1000, 1.5);
+            if (pdfDoc) {
+                renderPage(pageNum);
+            }
+        }
+
+        window.addEventListener('resize', onResize);
+        onResize();
     </script>
 </body>
 </html>
