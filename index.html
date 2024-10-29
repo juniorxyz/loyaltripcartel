@@ -2,97 +2,39 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>My Portfolio</title>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.9.359/pdf.min.js"></script>
     <style>
         body, html {
             margin: 0;
             padding: 0;
             height: 100%;
-            font-family: Arial, sans-serif;
             overflow: hidden;
         }
         #pdf-viewer {
             width: 100%;
             height: 100%;
-            overflow: auto;
-            background-color: #525659;
+            border: none;
         }
-        #pdf-viewer canvas {
-            margin: 0 auto;
-            display: block;
+        @media (max-width: 768px) {
+            #pdf-viewer {
+                width: 100vw;
+                height: 100vh;
+            }
         }
     </style>
 </head>
 <body>
-    <div id="pdf-viewer"></div>
+    <iframe id="pdf-viewer" src="https://mozilla.github.io/pdf.js/web/viewer.html?file=portfolio.pdf#zoom=page-fit" title="Portfolio PDF"></iframe>
     <script>
-        pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.9.359/pdf.worker.min.js';
-
-        const url = 'portfolio.pdf';
-        let pdfDoc = null,
-            pageRendering = false,
-            pageNumPending = null,
-            scale = 1;
-
-        const container = document.getElementById('pdf-viewer');
-
-        function getScale() {
-            return Math.min(container.clientWidth / 1000, 1.5);
-        }
-
-        function renderPage(num) {
-            pageRendering = true;
-            pdfDoc.getPage(num).then(function(page) {
-                scale = getScale();
-                const viewport = page.getViewport({scale: scale});
-                const canvas = document.createElement('canvas');
-                const ctx = canvas.getContext('2d');
-                canvas.height = viewport.height;
-                canvas.width = viewport.width;
-
-                const renderContext = {
-                    canvasContext: ctx,
-                    viewport: viewport
-                };
-                const renderTask = page.render(renderContext);
-
-                renderTask.promise.then(function() {
-                    pageRendering = false;
-                    if (pageNumPending !== null) {
-                        renderPage(pageNumPending);
-                        pageNumPending = null;
-                    }
-                });
-
-                container.appendChild(canvas);
-            });
-        }
-
-        function renderPages() {
-            container.innerHTML = '';
-            for (let num = 1; num <= pdfDoc.numPages; num++) {
-                renderPage(num);
-            }
-        }
-
-        pdfjsLib.getDocument(url).promise.then(function(pdfDoc_) {
-            pdfDoc = pdfDoc_;
-            renderPages();
-
-            container.addEventListener('click', function(e) {
-                if (e.target.tagName === 'A') {
-                    e.preventDefault();
-                    window.open(e.target.href, '_blank');
-                }
-            });
-        });
-
-        window.addEventListener('resize', function() {
-            if (pdfDoc) {
-                renderPages();
-            }
+        document.addEventListener('DOMContentLoaded', function() {
+            const iframe = document.getElementById('pdf-viewer');
+            iframe.onload = function() {
+                iframe.contentWindow.postMessage({
+                    action: 'setZoom',
+                    zoom: 'page-fit'
+                }, '*');
+            };
         });
     </script>
 </body>
