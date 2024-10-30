@@ -9,23 +9,34 @@
             margin: 0;
             padding: 0;
             height: 100%;
-            overflow: hidden;
+            width: 100%;
+            overflow: auto;
         }
         .pdf-container {
             width: 100%;
             height: 100vh;
-            overflow: hidden;
+            display: flex;
+            justify-content: center;
+            align-items: center;
         }
-        iframe {
+        object {
             width: 100%;
             height: 100%;
-            border: none;
+            max-width: 1000px; /* Adjust this value as needed */
+        }
+        .fallback {
+            text-align: center;
+            padding: 20px;
         }
     </style>
 </head>
 <body>
     <div class="pdf-container">
-        <iframe src="portfolio.pdf" type="application/pdf"></iframe>
+        <object data="portfolio.pdf" type="application/pdf" width="100%" height="100%">
+            <div class="fallback">
+                <p>It appears you don't have a PDF plugin for this browser. No worries, you can <a href="portfolio.pdf">click here to download the PDF file.</a></p>
+            </div>
+        </object>
     </div>
 </body>
 </html>
