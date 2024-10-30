@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, user-scalable=yes">
     <title>Portfolio PDF Viewer</title>
     <style>
         body, html {
@@ -37,8 +37,18 @@
                     ::-moz-selection { background: transparent; }
                     .textLayer { opacity: 1 !important; }
                     .annotationLayer .linkAnnotation .linkBorder { background: none !important; }
+                    /* Firefox-specific rule */
+                    .annotationLayer .linkAnnotation > a:hover {
+                        background: none !important;
+                        box-shadow: none !important;
+                    }
                 `;
                 iframe.contentDocument.head.appendChild(style);
+
+                // Set initial zoom for mobile
+                if (window.innerWidth <= 768) {
+                    iframe.contentWindow.postMessage({action: 'zoom', value: 1.0}, '*');
+                }
             };
         };
     </script>
