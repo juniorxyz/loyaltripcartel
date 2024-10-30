@@ -21,18 +21,26 @@
             height: 100%;
             border: none;
         }
-        /* Remove yellow overlay on hyperlinks */
-        ::selection {
-            background: transparent;
-        }
-        ::-moz-selection {
-            background: transparent;
-        }
     </style>
 </head>
 <body>
     <div class="pdf-container">
-        <iframe src="portfolio.pdf" type="application/pdf"></iframe>
+        <iframe id="pdf-viewer" src="portfolio.pdf" type="application/pdf"></iframe>
     </div>
+    <script>
+        window.onload = function() {
+            var iframe = document.getElementById('pdf-viewer');
+            iframe.onload = function() {
+                var style = document.createElement('style');
+                style.textContent = `
+                    ::selection { background: transparent; }
+                    ::-moz-selection { background: transparent; }
+                    .textLayer { opacity: 1 !important; }
+                    .annotationLayer .linkAnnotation .linkBorder { background: none !important; }
+                `;
+                iframe.contentDocument.head.appendChild(style);
+            };
+        };
+    </script>
 </body>
 </html>
